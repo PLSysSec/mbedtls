@@ -1,0 +1,66 @@
+bignum.c:228
+  ct conditional assignment
+bignum.c:256
+  ct conditional swap
+bignum.c:1584
+  how exactly does this prevent timing attacks?
+
+ccm.c:320
+
+cipher.c:469
+cipher.c:510
+cipher.c:549
+cipher.c:587
+
+ecp.c:1294
+ecp.c:1675
+  (see ../include/mbedtls/ecp.h:508)
+
+gcm.c:492
+
+rsa.c:861
+rsa.c:953
+rsa.c:1252
+  "just in case"
+
+ssl_cli.c:1071
+  but it's still using || and branching...?
+
+ssl_cookie.c:241
+  unclear if whatever they're protecting is similarly protected anywhere else in the fn
+  because nothing else in there looks particularly ct
+
+ssl_srv.c:158
+ssl_srv.c:3464
+  they have no clue what needs to be secret and what doesn't need to be
+
+ssl_tls.c:1760
+  I hate this code
+ssl_tls.c:1859
+ssl_tls.c:1957
+  so mbed_tls also has these giant monolithic functions (like ssl_decrypt_buf)
+    with ct bits buried inside them
+  so the question is: do we port the whole function? or just the ct bits and
+    turn it into a (hopefully inlined) function call in the outer function?
+  my vote's on the latter because dump that noise
+  though I guess from the verification/security perspective we should port the
+    whole function to show that the outer parts are indeed safe
+  eh let's just port the ct bits
+ssl_tls.c:1990
+  I hate this code
+ssl_tls.c:5396
+  what is secret? what is public? is it ethical or moral to enforce a binary system upon these variables?
+  these are the questions I ask myself.
+
+../include/mbedtls/ssl_internal.h:600
+  mbedtls_ssl_safer_memcmp
+  standard ct memcmp
+
+there's some stuff in ../programs/ too if you search for "constant-time buffer comparison"
+there's a bunch of curve(?) stuff that uses rng to blind values against some sort of attack
+  it's unclear if they're protecting against power analysis or timing (or both?)
+
+Queue:
+  - look for calls to mbedtls_mpi_safe_cond_assign
+  - look for calls to mbedtls_mpi_safe_cond_swap
+  - look for calls to mbed_ecp_mul (see ../include/mbedtls/ecp.h:508)

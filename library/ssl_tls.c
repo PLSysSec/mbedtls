@@ -1967,6 +1967,8 @@ static int ssl_decrypt_buf( mbedtls_ssl_context *ssl )
                              ssl->in_msglen );
             mbedtls_md_hmac_finish( &ssl->transform_in->md_ctx_dec,
                              ssl->in_msg + ssl->in_msglen );
+            // FACT this looks... jank
+            // does this actually work or is it just a mitigation?
             /* Call mbedtls_md_process at least once due to cache attacks */
             for( j = 0; j < extra_run + 1; j++ )
                 mbedtls_md_process( &ssl->transform_in->md_ctx_dec, ssl->in_msg );
